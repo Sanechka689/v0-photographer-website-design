@@ -91,7 +91,7 @@ export function PortfolioSection() {
                 className={`object-cover transition-all duration-1000 ${
                   hoveredId === 1 ? 'scale-105' : 'scale-100'
                 }`}
-                quality={90}
+
               />
               <div className={`absolute inset-0 bg-[#0D0D0D] transition-opacity duration-700 ${
                 hoveredId === 1 ? 'opacity-20' : 'opacity-40'
@@ -129,7 +129,7 @@ export function PortfolioSection() {
                     className={`object-cover transition-all duration-1000 ${
                       hoveredId === item.id ? 'scale-105' : 'scale-100'
                     }`}
-                    quality={85}
+
                   />
                   <div className={`absolute inset-0 bg-[#0D0D0D] transition-opacity duration-700 ${
                     hoveredId === item.id ? 'opacity-15' : 'opacity-45'
@@ -167,7 +167,7 @@ export function PortfolioSection() {
                     className={`object-cover transition-all duration-1000 ${
                       hoveredId === item.id + 100 ? 'scale-105' : 'scale-100'
                     }`}
-                    quality={80}
+
                   />
                   <div className={`absolute inset-0 bg-[#0D0D0D] transition-opacity duration-700 ${
                     hoveredId === item.id + 100 ? 'opacity-15' : 'opacity-50'

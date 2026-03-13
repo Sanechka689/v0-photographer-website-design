@@ -37,7 +37,7 @@ export function HeroSection() {
           alt="Архитектурная настольная лампа направлена на тёмную деревянную стену, создавая тёплый прямоугольный световой ореол"
           fill
           priority
-          quality={95}
+
           className="object-cover object-center"
           onLoad={() => setLoaded(true)}
         />
