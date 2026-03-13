@@ -37,7 +37,6 @@ export function HeroSection() {
           alt="Архитектурная настольная лампа направлена на тёмную деревянную стену, создавая тёплый прямоугольный световой ореол"
           fill
           priority
-
           className="object-cover object-center"
           onLoad={() => setLoaded(true)}
         />
@@ -89,8 +88,10 @@ export function HeroSection() {
                   Scroll
                 </span>
                 <div className="relative w-px h-16 bg-[#2E2820] overflow-hidden">
-                  <div className="absolute top-0 w-full bg-[#E6D2A2]/60 h-full animate-[slideDown_2s_ease-in-out_infinite]" 
-                    style={{ animation: 'slideDown 2s ease-in-out infinite' }} />
+                  <div
+                    className="absolute top-0 w-full bg-[#E6D2A2]/60 h-full"
+                    style={{ animation: 'slideDown 2s ease-in-out infinite' }}
+                  />
                 </div>
               </button>
             </div>
