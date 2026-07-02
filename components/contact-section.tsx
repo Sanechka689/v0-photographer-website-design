@@ -70,18 +70,16 @@ export function ContactSection() {
                     Москва
                   </p>
                   <a
-                    href="mailto:hello@lampa.studio"
+                    href="mailto:oi.alisa@yandex.ru"
                     className="block font-mono text-[13px] text-[#E6D2A2]/80 hover:text-[#E6D2A2] transition-colors duration-300 tracking-wide"
                   >
-                    hello@lampa.studio
+                    oi.alisa@yandex.ru
                   </a>
                   <a
-                    href="https://instagram.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="tel:+79327777552"
                     className="block font-mono text-[13px] text-[#7A7060] hover:text-[#E6D2A2] transition-colors duration-300 tracking-wide"
                   >
-                    @lampa.studio
+                    +7 (932) 777-75-52
                   </a>
                 </div>
               </div>
