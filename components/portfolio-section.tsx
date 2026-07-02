@@ -8,37 +8,50 @@ const portfolioItems = [
   {
     id: 1,
     src: '/images/portfolio-1.jpg',
-    title: 'Портрет в тишине',
-    category: 'Портрет',
+    title: 'Точка света',
+    category: 'Архитектура',
     year: '2024',
+    focus: 'object-center',
   },
   {
     id: 2,
     src: '/images/portfolio-2.jpg',
-    title: 'Архитектура света',
-    category: 'Интерьер',
-    year: '2024',
+    title: 'Маска',
+    category: 'Арт',
+    year: '2023',
+    focus: 'object-center',
   },
   {
     id: 3,
     src: '/images/portfolio-3.jpg',
-    title: 'Натюрморт',
+    title: 'Мой крест',
     category: 'Still Life',
-    year: '2023',
+    year: '2024',
+    focus: 'object-center',
   },
   {
     id: 4,
     src: '/images/portfolio-4.jpg',
-    title: 'Ночная улица',
-    category: 'Городской пейзаж',
-    year: '2023',
+    title: 'Глаз',
+    category: 'Портрет',
+    year: '2024',
+    focus: 'object-top',
   },
   {
     id: 5,
     src: '/images/portfolio-5.jpg',
-    title: 'Свет и тень',
+    title: 'Детство',
     category: 'Портрет',
+    year: '2023',
+    focus: 'object-top',
+  },
+  {
+    id: 6,
+    src: '/images/portfolio-6.jpg',
+    title: 'Падение',
+    category: 'Арт',
     year: '2024',
+    focus: 'object-top',
   },
 ]
 
@@ -88,7 +101,7 @@ export function PortfolioSection() {
                 src={portfolioItems[0].src}
                 alt={portfolioItems[0].title}
                 fill
-                className={`object-cover transition-all duration-1000 ${
+                className={`object-cover ${portfolioItems[0].focus} transition-all duration-1000 ${
                   hoveredId === 1 ? 'scale-105' : 'scale-100'
                 }`}
               />
@@ -125,7 +138,7 @@ export function PortfolioSection() {
                     src={item.src}
                     alt={item.title}
                     fill
-                    className={`object-cover transition-all duration-1000 ${
+                    className={`object-cover ${item.focus} transition-all duration-1000 ${
                       hoveredId === item.id ? 'scale-105' : 'scale-100'
                     }`}
                   />
@@ -150,7 +163,7 @@ export function PortfolioSection() {
 
           {/* Three-column grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {portfolioItems.slice(2, 5).map((item, index) => (
+            {portfolioItems.slice(3, 6).map((item, index) => (
               <FadeIn key={`${item.id}-grid`} direction="up" delay={index * 100}>
                 <div
                   className="relative group overflow-hidden cursor-pointer"
@@ -162,7 +175,7 @@ export function PortfolioSection() {
                     src={item.src}
                     alt={item.title}
                     fill
-                    className={`object-cover transition-all duration-1000 ${
+                    className={`object-cover ${item.focus} transition-all duration-1000 ${
                       hoveredId === item.id + 100 ? 'scale-105' : 'scale-100'
                     }`}
                   />
