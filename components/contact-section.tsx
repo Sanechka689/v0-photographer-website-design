@@ -6,17 +6,31 @@ import { FadeIn } from './fade-in'
 export function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
+    phone: '',
     email: '',
     message: '',
   })
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setStatus('sending')
-    // Simulate send
-    await new Promise((res) => setTimeout(res, 1400))
-    setStatus('sent')
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Request failed')
+      }
+
+      setStatus('sent')
+    } catch {
+      setStatus('error')
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -30,7 +44,7 @@ export function ContactSection() {
       aria-label="Контактная форма"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-12 gap-12 md:gap-20">
+        <div className="grid md:grid-cols-12 gap-12 md:gap-12 lg:gap-20">
 
           {/* Left: heading + info */}
           <div className="md:col-span-5">
@@ -107,6 +121,23 @@ export function ContactSection() {
                     />
                   </div>
 
+                  {/* Phone */}
+                  <div className="group">
+                    <label htmlFor="phone" className="block font-mono text-[10px] tracking-[0.3em] uppercase text-[#7A7060] mb-3 group-focus-within:text-[#E6D2A2] transition-colors duration-300">
+                      Телефон
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      className="w-full bg-transparent border-b border-[#2E2820] focus:border-[#E6D2A2]/60 py-3 font-mono text-[14px] text-[#F5F2E9] placeholder:text-[#2E2820] outline-none transition-colors duration-500"
+                      placeholder="+7 900 000-00-00"
+                    />
+                  </div>
+
                   {/* Email */}
                   <div className="group">
                     <label htmlFor="email" className="block font-mono text-[10px] tracking-[0.3em] uppercase text-[#7A7060] mb-3 group-focus-within:text-[#E6D2A2] transition-colors duration-300">
@@ -142,7 +173,7 @@ export function ContactSection() {
                   </div>
 
                   {/* Submit */}
-                  <div className="pt-4">
+                  <div className="pt-4 space-y-4">
                     <button
                       type="submit"
                       disabled={status === 'sending'}
@@ -154,6 +185,15 @@ export function ContactSection() {
                       </span>
                       <span className="block w-12 h-px bg-[#E6D2A2]/40 group-hover:w-20 transition-all duration-500" />
                     </button>
+                    {status === 'error' && (
+                      <p className="font-mono text-[12px] text-[#C97B63]">
+                        Не удалось отправить. Попробуйте ещё раз или напишите на {' '}
+                        <a href="mailto:oi.alisa@yandex.ru" className="underline underline-offset-4">
+                          oi.alisa@yandex.ru
+                        </a>
+                        .
+                      </p>
+                    )}
                   </div>
 
                 </form>

@@ -8,7 +8,7 @@ export function PhilosophySection() {
       aria-label="Философия бренда"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-12 gap-12 md:gap-20 items-start">
+        <div className="grid md:grid-cols-12 gap-12 md:gap-12 lg:gap-20 items-start">
 
           {/* Left: section label */}
           <div className="md:col-span-3">
