@@ -1,74 +1,102 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { portfolioItems, type PortfolioItem } from '@/lib/portfolio-items'
 import { FadeIn } from './fade-in'
 
-const portfolioItems = [
-  {
-    id: 1,
-    src: '/images/portfolio-1.jpg',
-    title: 'Точка света',
-    category: 'Архитектура',
-    year: '2024',
-    width: 1711,
-    height: 2000,
-    layout: 'md:col-span-1 lg:col-span-5',
-  },
-  {
-    id: 2,
-    src: '/images/portfolio-2.jpg',
-    title: 'Маска',
-    category: 'Арт',
-    year: '2023',
-    width: 1500,
-    height: 2000,
-    layout: 'md:col-span-1 md:pt-20 lg:col-span-4 lg:col-start-8 lg:pt-24',
-  },
-  {
-    id: 3,
-    src: '/images/portfolio-3.jpg',
-    title: 'Мой крест',
-    category: 'Still Life',
-    year: '2024',
-    width: 1500,
-    height: 2000,
-    layout: 'md:col-span-1 lg:col-span-4 lg:col-start-2',
-  },
-  {
-    id: 4,
-    src: '/images/portfolio-4.jpg',
-    title: 'Глаз',
-    category: 'Портрет',
-    year: '2024',
-    width: 1500,
-    height: 2000,
-    layout: 'md:col-span-1 md:pt-12 lg:col-span-4 lg:col-start-8 lg:pt-10',
-  },
-  {
-    id: 5,
-    src: '/images/portfolio-5.jpg',
-    title: 'Детство',
-    category: 'Портрет',
-    year: '2023',
-    width: 1413,
-    height: 2000,
-    layout: 'md:col-span-1 lg:col-span-4',
-  },
-  {
-    id: 6,
-    src: '/images/portfolio-6.jpg',
-    title: 'Падение',
-    category: 'Арт',
-    year: '2024',
-    width: 1984,
-    height: 2000,
-    layout: 'md:col-span-1 md:pt-16 lg:col-span-5 lg:col-start-7 lg:pt-16',
-  },
-]
+const MOBILE_INITIAL_COUNT = 10
+const MOBILE_LOAD_MORE_COUNT = 20
+
+const desktopPerRow = 4
+const tabletPerRow = 3
+
+const filmHoleBackground = '#0D0D0D'
+const horizontalPerforation = `repeating-linear-gradient(90deg, ${filmHoleBackground} 0 10px, transparent 10px 19px)`
+const verticalPerforation = `repeating-linear-gradient(180deg, ${filmHoleBackground} 0 12px, transparent 12px 24px)`
+
+function chunkItems(items: PortfolioItem[], size: number) {
+  const chunks: PortfolioItem[][] = []
+
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size))
+  }
+
+  return chunks
+}
+
+function HorizontalFilmFrame({ item, priority = false }: { item: PortfolioItem; priority?: boolean }) {
+  const flexRatio = item.width / item.height
+
+  return (
+    <div className="min-w-0" style={{ flexGrow: flexRatio, flexBasis: 0 }}>
+      <figure className="relative overflow-hidden rounded-[6px] bg-[#3B281C] px-[10px] pb-[14px] pt-[14px] shadow-[0_14px_32px_rgba(0,0,0,0.28)] ring-1 ring-[#5B3E2B]/35">
+        <div
+          aria-hidden="true"
+          className="absolute left-[10px] right-[10px] top-[4px] h-[6px] opacity-95"
+          style={{ backgroundImage: horizontalPerforation }}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute bottom-[4px] left-[10px] right-[10px] h-[6px] opacity-95"
+          style={{ backgroundImage: horizontalPerforation }}
+        />
+        <div
+          className="relative overflow-hidden rounded-[2px] bg-[#060606]"
+          style={{ aspectRatio: `${item.width} / ${item.height}` }}
+        >
+          <Image
+            src={item.src}
+            alt={item.alt}
+            fill
+            priority={priority}
+            sizes="(max-width: 1023px) 30vw, 24vw"
+            className="object-cover"
+          />
+        </div>
+      </figure>
+    </div>
+  )
+}
+
+function VerticalFilmFrame({ item, priority = false }: { item: PortfolioItem; priority?: boolean }) {
+  return (
+    <figure className="relative mx-auto w-full max-w-[25rem] overflow-hidden rounded-[8px] bg-[#4B3122] px-[18px] py-[18px] shadow-[0_18px_36px_rgba(0,0,0,0.3)] ring-1 ring-[#6A4A34]/45">
+      <div
+        aria-hidden="true"
+        className="absolute bottom-[18px] left-[7px] top-[18px] w-[7px] opacity-95"
+        style={{ backgroundImage: verticalPerforation }}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute bottom-[18px] right-[7px] top-[18px] w-[7px] opacity-95"
+        style={{ backgroundImage: verticalPerforation }}
+      />
+      <div
+        className="relative overflow-hidden rounded-[2px] border border-[#2A170F] bg-[#090909]"
+        style={{ aspectRatio: `${item.width} / ${item.height}` }}
+      >
+        <Image
+          src={item.src}
+          alt={item.alt}
+          fill
+          priority={priority}
+          sizes="(max-width: 767px) calc(100vw - 88px), 340px"
+          className="object-cover"
+        />
+      </div>
+    </figure>
+  )
+}
 
 export function PortfolioSection() {
-  const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [visibleMobileCount, setVisibleMobileCount] = useState(MOBILE_INITIAL_COUNT)
+
+  const tabletRows = useMemo(() => chunkItems(portfolioItems, tabletPerRow), [])
+  const desktopRows = useMemo(() => chunkItems(portfolioItems, desktopPerRow), [])
+
+  const mobileItems = portfolioItems.slice(0, visibleMobileCount)
+  const hasMoreMobileItems = visibleMobileCount < portfolioItems.length
 
   return (
     <section
@@ -76,9 +104,8 @@ export function PortfolioSection() {
       className="relative py-32 md:py-48 bg-[#0D0D0D]"
       aria-label="Портфолио"
     >
-      {/* Section header */}
-      <div className="px-8 md:px-16 mb-20">
-        <div className="max-w-7xl mx-auto flex items-end justify-between">
+      <div className="px-8 md:px-16 mb-16 md:mb-20">
+        <div className="max-w-[96rem] mx-auto flex items-end justify-between gap-8">
           <FadeIn direction="up">
             <div>
               <p className="font-mono text-[10px] tracking-[0.35em] uppercase text-[#7A7060] mb-4">
@@ -90,57 +117,74 @@ export function PortfolioSection() {
             </div>
           </FadeIn>
           <FadeIn direction="up" delay={200}>
-            <p className="hidden md:block font-mono text-[11px] tracking-[0.2em] text-[#7A7060] uppercase mb-2">
-              2015 – 2026
-            </p>
+            <div className="hidden md:flex flex-col items-end gap-2 mb-2">
+              <p className="font-mono text-[11px] tracking-[0.2em] text-[#7A7060] uppercase">
+                2015 – 2026
+              </p>
+              <p className="font-mono text-[10px] tracking-[0.28em] text-[#4D4338] uppercase">
+                {portfolioItems.length} кадров
+              </p>
+            </div>
           </FadeIn>
         </div>
       </div>
 
-      {/* Portfolio gallery */}
-      <div className="px-8 md:px-16">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-y-18 md:gap-y-24 lg:gap-y-32 md:gap-x-6 lg:gap-x-8">
-          {portfolioItems.map((item, index) => (
-            <FadeIn key={item.id} direction="up" delay={(index % 2) * 120} className={item.layout}>
-              <figure
-                className="group"
-                onMouseEnter={() => setHoveredId(item.id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                <div className="relative border border-[#1A1A1A] bg-[#10100F] transition-colors duration-700 group-hover:border-[#3D2B1A]">
-                  <Image
-                    src={item.src}
-                    alt={item.title}
-                    width={item.width}
-                    height={item.height}
-                    sizes="(max-width: 767px) calc(100vw - 64px), (max-width: 1279px) 42vw, 34vw"
-                    className={`h-auto w-full object-contain transition duration-700 ${
-                      hoveredId === item.id ? 'brightness-110' : 'brightness-95'
-                    }`}
-                  />
+      <div className="px-5 sm:px-8 md:px-16">
+        <div className="max-w-[96rem] mx-auto">
+          <div className="md:hidden space-y-5">
+            {mobileItems.map((item, index) => (
+              <FadeIn key={item.id} direction="up" delay={(index % 4) * 60}>
+                <VerticalFilmFrame item={item} priority={index < 2} />
+              </FadeIn>
+            ))}
+
+            {hasMoreMobileItems ? (
+              <FadeIn direction="up" delay={120}>
+                <div className="flex justify-center pt-4">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleMobileCount((currentCount) =>
+                        Math.min(currentCount + MOBILE_LOAD_MORE_COUNT, portfolioItems.length)
+                      )
+                    }
+                    className="inline-flex items-center justify-center rounded-full border border-[#5B3E2B] bg-[#241811] px-7 py-3 font-mono text-[10px] tracking-[0.28em] uppercase text-[#E6D2A2] transition duration-300 hover:border-[#8B5E3C] hover:bg-[#2E1E15] hover:text-[#F5F2E9]"
+                  >
+                    Показать ещё
+                  </button>
                 </div>
-                <figcaption className="mt-4 flex items-start justify-between gap-6 border-t border-[#1A1A1A] pt-4">
-                  <div>
-                    <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-[#E6D2A2]/55 mb-2">
-                      {item.category}
-                    </p>
-                    <h3 className="font-serif text-[24px] md:text-[28px] font-light leading-none text-[#F5F2E9]">
-                      {item.title}
-                    </h3>
-                  </div>
-                  <span className="font-mono text-[10px] text-[#7A7060] pt-1">
-                    {item.year}
-                  </span>
-                </figcaption>
-              </figure>
-            </FadeIn>
-          ))}
+              </FadeIn>
+            ) : null}
+          </div>
+
+          <div className="hidden md:block lg:hidden space-y-3">
+            {tabletRows.map((row, rowIndex) => (
+              <FadeIn key={`tablet-row-${rowIndex}`} direction="up" delay={rowIndex * 80}>
+                <div className="flex items-stretch gap-3">
+                  {row.map((item) => (
+                    <HorizontalFilmFrame key={item.id} item={item} priority={rowIndex === 0} />
+                  ))}
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+
+          <div className="hidden lg:block space-y-3">
+            {desktopRows.map((row, rowIndex) => (
+              <FadeIn key={`desktop-row-${rowIndex}`} direction="up" delay={rowIndex * 70}>
+                <div className="flex items-stretch gap-3">
+                  {row.map((item) => (
+                    <HorizontalFilmFrame key={item.id} item={item} priority={rowIndex === 0} />
+                  ))}
+                </div>
+              </FadeIn>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Decorative separator */}
-      <div className="px-8 md:px-16 mt-28">
-        <div className="max-w-7xl mx-auto">
+      <div className="px-8 md:px-16 mt-20 md:mt-28">
+        <div className="max-w-[96rem] mx-auto">
           <div className="w-full h-px bg-gradient-to-r from-transparent via-[#2E2820] to-transparent" />
         </div>
       </div>
