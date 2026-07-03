@@ -1,99 +1,51 @@
 'use client'
 
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
-import { portfolioItems, type PortfolioItem } from '@/lib/portfolio-items'
+import { useState } from 'react'
+import { portfolioItems } from '@/lib/portfolio-items'
 import { FadeIn } from './fade-in'
 
 const MOBILE_INITIAL_COUNT = 10
 const MOBILE_LOAD_MORE_COUNT = 20
 
-const desktopPerRow = 4
-const tabletPerRow = 3
+const verticalPerforation = `repeating-linear-gradient(180deg, rgba(13,13,13,0.96) 0 12px, transparent 12px 24px)`
 
-const filmHoleBackground = '#0D0D0D'
-const horizontalPerforation = `repeating-linear-gradient(90deg, ${filmHoleBackground} 0 10px, transparent 10px 19px)`
-const verticalPerforation = `repeating-linear-gradient(180deg, ${filmHoleBackground} 0 12px, transparent 12px 24px)`
-
-function chunkItems(items: PortfolioItem[], size: number) {
-  const chunks: PortfolioItem[][] = []
-
-  for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size))
-  }
-
-  return chunks
-}
-
-function HorizontalFilmFrame({ item, priority = false }: { item: PortfolioItem; priority?: boolean }) {
-  const flexRatio = item.width / item.height
-
+function MobileFilmFrame({
+  title,
+  year,
+  src,
+  alt,
+  width,
+  height,
+}: (typeof portfolioItems)[number]) {
   return (
-    <div className="min-w-0" style={{ flexGrow: flexRatio, flexBasis: 0 }}>
-      <figure className="relative overflow-hidden rounded-[6px] bg-[#3B281C] px-[10px] pb-[14px] pt-[14px] shadow-[0_14px_32px_rgba(0,0,0,0.28)] ring-1 ring-[#5B3E2B]/35">
-        <div
-          aria-hidden="true"
-          className="absolute left-[10px] right-[10px] top-[4px] h-[6px] opacity-95"
-          style={{ backgroundImage: horizontalPerforation }}
+    <div className="relative overflow-hidden rounded-[2px] border border-[#35231B] bg-[#070707]">
+      <div style={{ aspectRatio: `${width} / ${height}` }} className="relative">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 719px) calc(100vw - 92px), 320px"
+          className="object-contain"
         />
-        <div
-          aria-hidden="true"
-          className="absolute bottom-[4px] left-[10px] right-[10px] h-[6px] opacity-95"
-          style={{ backgroundImage: horizontalPerforation }}
-        />
-        <div
-          className="relative overflow-hidden rounded-[2px] bg-[#060606]"
-          style={{ aspectRatio: `${item.width} / ${item.height}` }}
-        >
-          <Image
-            src={item.src}
-            alt={item.alt}
-            fill
-            priority={priority}
-            sizes="(max-width: 1023px) 30vw, 24vw"
-            className="object-cover"
-          />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/78 to-transparent px-4 pb-4 pt-10">
+          <div className="flex items-end justify-between gap-4">
+            <h3 className="font-serif text-[20px] font-light leading-none text-[#F5F2E9]">
+              {title}
+            </h3>
+            <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-[#8A7B66]">
+              {year}
+            </span>
+          </div>
         </div>
-      </figure>
+      </div>
     </div>
   )
 }
 
-function VerticalFilmFrame({ item, priority = false }: { item: PortfolioItem; priority?: boolean }) {
-  return (
-    <figure className="relative mx-auto w-full max-w-[25rem] overflow-hidden rounded-[8px] bg-[#4B3122] px-[18px] py-[18px] shadow-[0_18px_36px_rgba(0,0,0,0.3)] ring-1 ring-[#6A4A34]/45">
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[18px] left-[7px] top-[18px] w-[7px] opacity-95"
-        style={{ backgroundImage: verticalPerforation }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[18px] right-[7px] top-[18px] w-[7px] opacity-95"
-        style={{ backgroundImage: verticalPerforation }}
-      />
-      <div
-        className="relative overflow-hidden rounded-[2px] border border-[#2A170F] bg-[#090909]"
-        style={{ aspectRatio: `${item.width} / ${item.height}` }}
-      >
-        <Image
-          src={item.src}
-          alt={item.alt}
-          fill
-          priority={priority}
-          sizes="(max-width: 767px) calc(100vw - 88px), 340px"
-          className="object-cover"
-        />
-      </div>
-    </figure>
-  )
-}
-
 export function PortfolioSection() {
+  const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [visibleMobileCount, setVisibleMobileCount] = useState(MOBILE_INITIAL_COUNT)
-
-  const tabletRows = useMemo(() => chunkItems(portfolioItems, tabletPerRow), [])
-  const desktopRows = useMemo(() => chunkItems(portfolioItems, desktopPerRow), [])
 
   const mobileItems = portfolioItems.slice(0, visibleMobileCount)
   const hasMoreMobileItems = visibleMobileCount < portfolioItems.length
@@ -105,7 +57,7 @@ export function PortfolioSection() {
       aria-label="Портфолио"
     >
       <div className="px-8 md:px-16 mb-16 md:mb-20">
-        <div className="max-w-[96rem] mx-auto flex items-end justify-between gap-8">
+        <div className="max-w-7xl mx-auto flex items-end justify-between gap-8">
           <FadeIn direction="up">
             <div>
               <p className="font-mono text-[10px] tracking-[0.35em] uppercase text-[#7A7060] mb-4">
@@ -117,65 +69,181 @@ export function PortfolioSection() {
             </div>
           </FadeIn>
           <FadeIn direction="up" delay={200}>
-            <div className="hidden md:flex flex-col items-end gap-2 mb-2">
+            <div className="portfolio-meta-desktop">
               <p className="font-mono text-[11px] tracking-[0.2em] text-[#7A7060] uppercase">
                 2015 – 2026
               </p>
-              <p className="font-mono text-[10px] tracking-[0.28em] text-[#4D4338] uppercase">
-                {portfolioItems.length} кадров
+              <p className="mt-2 font-mono text-[10px] tracking-[0.28em] text-[#4D4338] uppercase">
+                {portfolioItems.length} работ
               </p>
             </div>
           </FadeIn>
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 md:px-16">
-        <div className="max-w-[96rem] mx-auto">
-          <div className="md:hidden space-y-5">
-            {mobileItems.map((item, index) => (
-              <FadeIn key={item.id} direction="up" delay={(index % 4) * 60}>
-                <VerticalFilmFrame item={item} priority={index < 2} />
-              </FadeIn>
-            ))}
+      <div className="portfolio-mobile px-5 sm:px-8">
+        <div className="max-w-[26rem] mx-auto">
+          <FadeIn direction="up">
+            <div className="relative overflow-hidden rounded-[12px] bg-[#241811] px-[18px] py-[20px] shadow-[0_18px_40px_rgba(0,0,0,0.36)] ring-1 ring-[#3D2A22]">
+              <div
+                aria-hidden="true"
+                className="absolute bottom-[16px] left-[7px] top-[16px] w-[8px]"
+                style={{ backgroundImage: verticalPerforation }}
+              />
+              <div
+                aria-hidden="true"
+                className="absolute bottom-[16px] right-[7px] top-[16px] w-[8px]"
+                style={{ backgroundImage: verticalPerforation }}
+              />
 
-            {hasMoreMobileItems ? (
-              <FadeIn direction="up" delay={120}>
-                <div className="flex justify-center pt-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setVisibleMobileCount((currentCount) =>
-                        Math.min(currentCount + MOBILE_LOAD_MORE_COUNT, portfolioItems.length)
-                      )
-                    }
-                    className="inline-flex items-center justify-center rounded-full border border-[#5B3E2B] bg-[#241811] px-7 py-3 font-mono text-[10px] tracking-[0.28em] uppercase text-[#E6D2A2] transition duration-300 hover:border-[#8B5E3C] hover:bg-[#2E1E15] hover:text-[#F5F2E9]"
-                  >
-                    Показать ещё
-                  </button>
+              <div className="space-y-4">
+                {mobileItems.map((item) => (
+                  <MobileFilmFrame key={item.id} {...item} />
+                ))}
+              </div>
+            </div>
+          </FadeIn>
+
+          {hasMoreMobileItems ? (
+            <FadeIn direction="up" delay={120}>
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibleMobileCount((currentCount) =>
+                      Math.min(currentCount + MOBILE_LOAD_MORE_COUNT, portfolioItems.length)
+                    )
+                  }
+                  className="inline-flex items-center justify-center rounded-full border border-[#3A2B22] bg-[#16110D] px-8 py-3 font-serif text-[26px] font-light leading-none text-[#B59C79] transition duration-300 hover:border-[#514036] hover:text-[#D5C1A2]"
+                >
+                  Показать ещё
+                </button>
+              </div>
+            </FadeIn>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="portfolio-desktop px-8 md:px-16">
+        <div className="max-w-7xl mx-auto">
+          <FadeIn direction="up">
+            <div
+              className="relative group overflow-hidden mb-4 cursor-pointer"
+              onMouseEnter={() => setHoveredId(1)}
+              onMouseLeave={() => setHoveredId(null)}
+              style={{ height: 'clamp(320px, 55vw, 680px)' }}
+            >
+              <Image
+                src={portfolioItems[0].src}
+                alt={portfolioItems[0].title}
+                fill
+                className={`object-cover ${portfolioItems[0].focus} transition-all duration-1000 ${
+                  hoveredId === 1 ? 'scale-105' : 'scale-100'
+                }`}
+              />
+              <div className={`absolute inset-0 bg-[#0D0D0D] transition-opacity duration-700 ${
+                hoveredId === 1 ? 'opacity-20' : 'opacity-42'
+              }`} />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/70 to-transparent px-8 pb-8 pt-20">
+                <div className="flex items-end justify-between gap-8">
+                  <div>
+                    <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#E6D2A2]/60 mb-2">
+                      {portfolioItems[0].category}
+                    </p>
+                    <h3 className="font-serif text-[28px] md:text-[36px] font-light text-[#F5F2E9]">
+                      {portfolioItems[0].title}
+                    </h3>
+                    <p className="mt-3 max-w-md font-mono text-[11px] tracking-[0.12em] uppercase text-[#A59478]">
+                      {portfolioItems[0].note}
+                    </p>
+                  </div>
+                  <span className="font-mono text-[11px] text-[#7A7060]">
+                    {portfolioItems[0].year}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {portfolioItems.slice(1, 3).map((item, index) => (
+              <FadeIn key={item.id} direction="up" delay={index * 120}>
+                <div
+                  className="relative group overflow-hidden cursor-pointer"
+                  onMouseEnter={() => setHoveredId(item.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{ height: 'clamp(240px, 30vw, 480px)' }}
+                >
+                  <Image
+                    src={item.src}
+                    alt={item.title}
+                    fill
+                    className={`object-cover ${item.focus} transition-all duration-1000 ${
+                      hoveredId === item.id ? 'scale-105' : 'scale-100'
+                    }`}
+                  />
+                  <div className={`absolute inset-0 bg-[#0D0D0D] transition-opacity duration-700 ${
+                    hoveredId === item.id ? 'opacity-15' : 'opacity-46'
+                  }`} />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/72 to-transparent px-6 pb-6 pt-16">
+                    <div className="flex items-end justify-between gap-6">
+                      <div>
+                        <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-[#E6D2A2]/60 mb-1">
+                          {item.category}
+                        </p>
+                        <h3 className="font-serif text-[22px] font-light text-[#F5F2E9]">
+                          {item.title}
+                        </h3>
+                        <p className="mt-2 font-mono text-[10px] tracking-[0.12em] uppercase text-[#A59478]">
+                          {item.note}
+                        </p>
+                      </div>
+                      <span className="font-mono text-[10px] text-[#7A7060]">{item.year}</span>
+                    </div>
+                  </div>
                 </div>
               </FadeIn>
-            ) : null}
-          </div>
-
-          <div className="hidden md:block lg:hidden space-y-3">
-            {tabletRows.map((row, rowIndex) => (
-              <FadeIn key={`tablet-row-${rowIndex}`} direction="up" delay={rowIndex * 80}>
-                <div className="flex items-stretch gap-3">
-                  {row.map((item) => (
-                    <HorizontalFilmFrame key={item.id} item={item} priority={rowIndex === 0} />
-                  ))}
-                </div>
-              </FadeIn>
             ))}
           </div>
 
-          <div className="hidden lg:block space-y-3">
-            {desktopRows.map((row, rowIndex) => (
-              <FadeIn key={`desktop-row-${rowIndex}`} direction="up" delay={rowIndex * 70}>
-                <div className="flex items-stretch gap-3">
-                  {row.map((item) => (
-                    <HorizontalFilmFrame key={item.id} item={item} priority={rowIndex === 0} />
-                  ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {portfolioItems.slice(3, 6).map((item, index) => (
+              <FadeIn key={item.id} direction="up" delay={index * 100}>
+                <div
+                  className="relative group overflow-hidden cursor-pointer"
+                  onMouseEnter={() => setHoveredId(item.id + 100)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  style={{ height: 'clamp(220px, 22vw, 360px)' }}
+                >
+                  <Image
+                    src={item.src}
+                    alt={item.title}
+                    fill
+                    className={`object-cover ${item.focus} transition-all duration-1000 ${
+                      hoveredId === item.id + 100 ? 'scale-105' : 'scale-100'
+                    }`}
+                  />
+                  <div className={`absolute inset-0 bg-[#0D0D0D] transition-opacity duration-700 ${
+                    hoveredId === item.id + 100 ? 'opacity-15' : 'opacity-52'
+                  }`} />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/74 to-transparent px-5 pb-5 pt-14">
+                    <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-[#E6D2A2]/50 mb-1">
+                      {item.category}
+                    </p>
+                    <div className="flex items-end justify-between gap-5">
+                      <div>
+                        <h3 className="font-serif text-[18px] font-light text-[#F5F2E9]">
+                          {item.title}
+                        </h3>
+                        <p className="mt-2 font-mono text-[10px] tracking-[0.12em] uppercase text-[#A59478]">
+                          {item.note}
+                        </p>
+                      </div>
+                      <span className="font-mono text-[10px] text-[#7A7060]">
+                        {item.year}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </FadeIn>
             ))}
@@ -184,10 +252,40 @@ export function PortfolioSection() {
       </div>
 
       <div className="px-8 md:px-16 mt-20 md:mt-28">
-        <div className="max-w-[96rem] mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="w-full h-px bg-gradient-to-r from-transparent via-[#2E2820] to-transparent" />
         </div>
       </div>
+
+      <style jsx>{`
+        .portfolio-meta-desktop {
+          display: none;
+        }
+
+        .portfolio-desktop {
+          display: none;
+        }
+
+        .portfolio-mobile {
+          display: block;
+        }
+
+        @media (min-width: 720px) {
+          .portfolio-meta-desktop {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+          }
+
+          .portfolio-desktop {
+            display: block;
+          }
+
+          .portfolio-mobile {
+            display: none;
+          }
+        }
+      `}</style>
     </section>
   )
 }
