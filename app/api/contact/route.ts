@@ -33,10 +33,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const upstream = await fetch(scriptUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, name, phone, email, message }),
+    const upstreamUrl = new URL(scriptUrl)
+    upstreamUrl.searchParams.set('payload', JSON.stringify({ secret, name, phone, email, message }))
+
+    const upstream = await fetch(upstreamUrl, {
+      method: 'GET',
+      cache: 'no-store',
       redirect: 'follow',
     })
 

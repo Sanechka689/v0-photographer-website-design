@@ -27,9 +27,27 @@
  */
 
 function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents)
+  return handleContactRequest(parseRequestData(e))
+}
 
+function doGet(e) {
+  return handleContactRequest(parseRequestData(e))
+}
+
+function parseRequestData(e) {
+  if (e.parameter && e.parameter.payload) {
+    return JSON.parse(e.parameter.payload)
+  }
+
+  if (e.postData && e.postData.contents) {
+    return JSON.parse(e.postData.contents)
+  }
+
+  return e.parameter || {}
+}
+
+function handleContactRequest(data) {
+  try {
     var expectedSecret = PropertiesService.getScriptProperties().getProperty('CONTACT_FORM_SECRET')
     if (expectedSecret && data.secret !== expectedSecret) {
       return jsonResponse({ status: 'error', message: 'unauthorized' })
