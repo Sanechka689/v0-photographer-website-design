@@ -70,16 +70,16 @@ export function ContactSection() {
                     Москва
                   </p>
                   <a
-                    href="mailto:oi.alisa@yandex.ru"
+                    href="mailto:oi.lampa@mail.ru"
                     className="block font-mono text-[13px] text-[#E6D2A2]/80 hover:text-[#E6D2A2] transition-colors duration-300 tracking-wide"
                   >
-                    oi.alisa@yandex.ru
+                    oi.lampa@mail.ru
                   </a>
                   <a
-                    href="tel:+79327777552"
+                    href="tel:+79670479249"
                     className="block font-mono text-[13px] text-[#7A7060] hover:text-[#E6D2A2] transition-colors duration-300 tracking-wide"
                   >
-                    +7 (932) 777-75-52
+                    +7 (967) 047-92-49
                   </a>
                 </div>
               </div>
@@ -186,8 +186,8 @@ export function ContactSection() {
                     {status === 'error' && (
                       <p className="font-mono text-[12px] text-[#C97B63]">
                         Не удалось отправить. Попробуйте ещё раз или напишите на {' '}
-                        <a href="mailto:oi.alisa@yandex.ru" className="underline underline-offset-4">
-                          oi.alisa@yandex.ru
+                        <a href="mailto:oi.lampa@mail.ru" className="underline underline-offset-4">
+                          oi.lampa@mail.ru
                         </a>
                         .
                       </p>

@@ -8,92 +8,125 @@ import { FadeIn } from './fade-in'
 const MOBILE_INITIAL_COUNT = 10
 const MOBILE_LOAD_MORE_COUNT = 20
 
-const desktopPerRow = 4
-const tabletPerRow = 3
+const TABLET_PATTERN = [1, 2, 2, 1, 2, 2]
+const DESKTOP_PATTERN = [1, 2, 3, 2, 3]
 
-const filmHoleBackground = '#0D0D0D'
-const horizontalPerforation = `repeating-linear-gradient(90deg, ${filmHoleBackground} 0 10px, transparent 10px 19px)`
-const verticalPerforation = `repeating-linear-gradient(180deg, ${filmHoleBackground} 0 12px, transparent 12px 24px)`
+const filmCutout = '#0D0D0D'
+const verticalPerforation = `repeating-linear-gradient(180deg, ${filmCutout} 0 11px, transparent 11px 25px)`
 
-function chunkItems(items: PortfolioItem[], size: number) {
-  const chunks: PortfolioItem[][] = []
+function buildRows(items: PortfolioItem[], pattern: number[]) {
+  const rows: PortfolioItem[][] = []
+  let cursor = 0
+  let patternIndex = 0
 
-  for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size))
+  while (cursor < items.length) {
+    const plannedCount = pattern[patternIndex % pattern.length]
+    const count = Math.min(plannedCount, items.length - cursor)
+
+    rows.push(items.slice(cursor, cursor + count))
+    cursor += count
+    patternIndex += 1
   }
 
-  return chunks
+  return rows
 }
 
-function HorizontalFilmFrame({ item, priority = false }: { item: PortfolioItem; priority?: boolean }) {
-  const flexRatio = item.width / item.height
-
-  return (
-    <div className="min-w-0" style={{ flexGrow: flexRatio, flexBasis: 0 }}>
-      <figure className="relative overflow-hidden rounded-[6px] bg-[#3B281C] px-[10px] pb-[14px] pt-[14px] shadow-[0_14px_32px_rgba(0,0,0,0.28)] ring-1 ring-[#5B3E2B]/35">
-        <div
-          aria-hidden="true"
-          className="absolute left-[10px] right-[10px] top-[4px] h-[6px] opacity-95"
-          style={{ backgroundImage: horizontalPerforation }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute bottom-[4px] left-[10px] right-[10px] h-[6px] opacity-95"
-          style={{ backgroundImage: horizontalPerforation }}
-        />
-        <div
-          className="relative overflow-hidden rounded-[2px] bg-[#060606]"
-          style={{ aspectRatio: `${item.width} / ${item.height}` }}
-        >
-          <Image
-            src={item.src}
-            alt={item.alt}
-            fill
-            priority={priority}
-            sizes="(max-width: 1023px) 30vw, 24vw"
-            className="object-cover"
-          />
-        </div>
-      </figure>
-    </div>
-  )
+function getTabletRowHeight(count: number, rowIndex: number) {
+  if (count === 1) return 'clamp(320px, 54vw, 520px)'
+  return rowIndex % 3 === 1 ? 'clamp(260px, 34vw, 390px)' : 'clamp(290px, 37vw, 430px)'
 }
 
-function VerticalFilmFrame({ item, priority = false }: { item: PortfolioItem; priority?: boolean }) {
+function getDesktopRowHeight(count: number, rowIndex: number) {
+  if (count === 1) return rowIndex % 2 === 0 ? 'clamp(360px, 42vw, 620px)' : 'clamp(330px, 39vw, 560px)'
+  if (count === 2) return rowIndex % 2 === 0 ? 'clamp(290px, 27vw, 430px)' : 'clamp(320px, 29vw, 470px)'
+  return rowIndex % 2 === 0 ? 'clamp(230px, 20vw, 330px)' : 'clamp(255px, 21vw, 350px)'
+}
+
+function getSizesByCount(count: number) {
+  if (count === 1) return '(max-width: 719px) 100vw, (max-width: 1023px) 88vw, 92vw'
+  if (count === 2) return '(max-width: 719px) 100vw, (max-width: 1023px) 44vw, 46vw'
+  return '(max-width: 719px) 100vw, (max-width: 1023px) 44vw, 30vw'
+}
+
+function DesktopGalleryCard({
+  item,
+  count,
+  centerSolo = false,
+  priority = false,
+}: {
+  item: PortfolioItem
+  count: number
+  centerSolo?: boolean
+  priority?: boolean
+}) {
+  const ratio = item.width / item.height
+  const soloWidth = `${Math.min(82, Math.max(46, ratio * 58))}%`
+
   return (
-    <figure className="relative mx-auto w-full max-w-[25rem] overflow-hidden rounded-[8px] bg-[#4B3122] px-[18px] py-[18px] shadow-[0_18px_36px_rgba(0,0,0,0.3)] ring-1 ring-[#6A4A34]/45">
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[18px] left-[7px] top-[18px] w-[7px] opacity-95"
-        style={{ backgroundImage: verticalPerforation }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[18px] right-[7px] top-[18px] w-[7px] opacity-95"
-        style={{ backgroundImage: verticalPerforation }}
-      />
-      <div
-        className="relative overflow-hidden rounded-[2px] border border-[#2A170F] bg-[#090909]"
-        style={{ aspectRatio: `${item.width} / ${item.height}` }}
-      >
+    <figure
+      className="group relative min-w-0 flex-1 overflow-hidden rounded-[4px] bg-transparent"
+      style={
+        count === 1 && centerSolo
+          ? { width: soloWidth, flex: '0 1 auto' }
+          : { flexGrow: Math.max(ratio, 0.72), flexBasis: 0 }
+      }
+    >
+      <div className="relative h-full min-h-0 overflow-hidden bg-[#11100F]">
         <Image
           src={item.src}
           alt={item.alt}
           fill
           priority={priority}
-          sizes="(max-width: 767px) calc(100vw - 88px), 340px"
-          className="object-cover"
+          sizes={getSizesByCount(count)}
+          className="object-contain transition duration-700 group-hover:scale-[1.015]"
         />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/70 to-transparent px-5 pb-5 pt-16 md:px-6 md:pb-6 md:pt-20">
+          <p className="font-mono text-[9px] tracking-[0.28em] uppercase text-[#E6D2A2]/58">
+            {item.category}
+          </p>
+          <h3 className="mt-2 font-serif text-[22px] font-light leading-none text-[#F5F2E9] md:text-[24px]">
+            {item.title}
+          </h3>
+        </div>
       </div>
     </figure>
+  )
+}
+
+function MobileFilmCard({ item, priority = false }: { item: PortfolioItem; priority?: boolean }) {
+  return (
+    <article className="relative px-5 py-5">
+      <div className="relative overflow-hidden rounded-[3px] border border-[#8A7968]/20 bg-[#0A0A0A]/90">
+        <div className="relative" style={{ aspectRatio: `${item.width} / ${item.height}` }}>
+          <Image
+            src={item.src}
+            alt={item.alt}
+            fill
+            priority={priority}
+            sizes="(max-width: 719px) calc(100vw - 104px), 320px"
+            className="object-contain"
+          />
+        </div>
+      </div>
+      <div className="flex items-end justify-between gap-4 px-1 pt-3">
+        <div className="min-w-0">
+          <p className="font-mono text-[9px] tracking-[0.26em] uppercase text-[#8E816F]">
+            {item.category}
+          </p>
+          <h3 className="mt-2 truncate font-serif text-[22px] font-light leading-none text-[#F5F2E9]">
+            {item.title}
+          </h3>
+        </div>
+      </div>
+    </article>
   )
 }
 
 export function PortfolioSection() {
   const [visibleMobileCount, setVisibleMobileCount] = useState(MOBILE_INITIAL_COUNT)
 
-  const tabletRows = useMemo(() => chunkItems(portfolioItems, tabletPerRow), [])
-  const desktopRows = useMemo(() => chunkItems(portfolioItems, desktopPerRow), [])
+  const tabletRows = useMemo(() => buildRows(portfolioItems, TABLET_PATTERN), [])
+  const desktopRows = useMemo(() => buildRows(portfolioItems, DESKTOP_PATTERN), [])
 
   const mobileItems = portfolioItems.slice(0, visibleMobileCount)
   const hasMoreMobileItems = visibleMobileCount < portfolioItems.length
@@ -101,93 +134,179 @@ export function PortfolioSection() {
   return (
     <section
       id="portfolio"
-      className="relative py-32 md:py-48 bg-[#0D0D0D]"
+      className="relative bg-[#0D0D0D] py-32 md:py-48"
       aria-label="Портфолио"
     >
-      <div className="px-8 md:px-16 mb-16 md:mb-20">
-        <div className="max-w-[96rem] mx-auto flex items-end justify-between gap-8">
+      <div className="mb-16 px-8 md:mb-20 md:px-16">
+        <div className="mx-auto flex max-w-[96rem] items-end justify-between gap-8">
           <FadeIn direction="up">
             <div>
-              <p className="font-mono text-[10px] tracking-[0.35em] uppercase text-[#7A7060] mb-4">
+              <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.35em] text-[#7A7060]">
                 02 — Портфолио
               </p>
-              <h2 className="font-serif text-[48px] md:text-[64px] font-light text-[#F5F2E9] leading-[1.0] tracking-[-0.01em]">
+              <h2 className="font-serif text-[48px] font-light leading-[1] tracking-[-0.01em] text-[#F5F2E9] md:text-[64px]">
                 Избранные работы
               </h2>
             </div>
           </FadeIn>
           <FadeIn direction="up" delay={200}>
-            <div className="hidden md:flex flex-col items-end gap-2 mb-2">
-              <p className="font-mono text-[11px] tracking-[0.2em] text-[#7A7060] uppercase">
+            <div className="portfolio-meta-desktop flex-col items-end gap-2">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#7A7060]">
                 2015 – 2026
               </p>
-              <p className="font-mono text-[10px] tracking-[0.28em] text-[#4D4338] uppercase">
-                {portfolioItems.length} кадров
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#4D4338]">
+                {portfolioItems.length} работ
               </p>
             </div>
           </FadeIn>
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 md:px-16">
-        <div className="max-w-[96rem] mx-auto">
-          <div className="md:hidden space-y-5">
-            {mobileItems.map((item, index) => (
-              <FadeIn key={item.id} direction="up" delay={(index % 4) * 60}>
-                <VerticalFilmFrame item={item} priority={index < 2} />
-              </FadeIn>
-            ))}
+      <div className="portfolio-mobile px-5 sm:px-8">
+        <div className="mx-auto max-w-[27rem]">
+          <FadeIn direction="up">
+            <div className="relative overflow-hidden rounded-[16px] border border-[#5C4D40]/16 bg-[linear-gradient(180deg,rgba(65,48,39,0.32),rgba(24,19,17,0.2))] shadow-[0_22px_48px_rgba(0,0,0,0.22)]">
+              <div
+                aria-hidden="true"
+                className="absolute bottom-0 left-[10px] top-0 w-[9px] opacity-45"
+                style={{ backgroundImage: verticalPerforation }}
+              />
+              <div
+                aria-hidden="true"
+                className="absolute bottom-0 right-[10px] top-0 w-[9px] opacity-45"
+                style={{ backgroundImage: verticalPerforation }}
+              />
 
-            {hasMoreMobileItems ? (
-              <FadeIn direction="up" delay={120}>
-                <div className="flex justify-center pt-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setVisibleMobileCount((currentCount) =>
-                        Math.min(currentCount + MOBILE_LOAD_MORE_COUNT, portfolioItems.length)
-                      )
-                    }
-                    className="inline-flex items-center justify-center rounded-full border border-[#5B3E2B] bg-[#241811] px-7 py-3 font-mono text-[10px] tracking-[0.28em] uppercase text-[#E6D2A2] transition duration-300 hover:border-[#8B5E3C] hover:bg-[#2E1E15] hover:text-[#F5F2E9]"
+              <div className="relative py-2">
+                {mobileItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className={`relative ${index === 0 ? '' : 'border-t border-[#86725F]/10'}`}
                   >
-                    Показать ещё
-                  </button>
-                </div>
-              </FadeIn>
-            ) : null}
-          </div>
+                    <FadeIn direction="up" delay={(index % 4) * 60}>
+                      <MobileFilmCard item={item} priority={index < 2} />
+                    </FadeIn>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </FadeIn>
 
-          <div className="hidden md:block lg:hidden space-y-3">
-            {tabletRows.map((row, rowIndex) => (
-              <FadeIn key={`tablet-row-${rowIndex}`} direction="up" delay={rowIndex * 80}>
-                <div className="flex items-stretch gap-3">
-                  {row.map((item) => (
-                    <HorizontalFilmFrame key={item.id} item={item} priority={rowIndex === 0} />
-                  ))}
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-
-          <div className="hidden lg:block space-y-3">
-            {desktopRows.map((row, rowIndex) => (
-              <FadeIn key={`desktop-row-${rowIndex}`} direction="up" delay={rowIndex * 70}>
-                <div className="flex items-stretch gap-3">
-                  {row.map((item) => (
-                    <HorizontalFilmFrame key={item.id} item={item} priority={rowIndex === 0} />
-                  ))}
-                </div>
-              </FadeIn>
-            ))}
-          </div>
+          {hasMoreMobileItems ? (
+            <FadeIn direction="up" delay={120}>
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibleMobileCount((currentCount) =>
+                      Math.min(currentCount + MOBILE_LOAD_MORE_COUNT, portfolioItems.length)
+                    )
+                  }
+                  className="inline-flex items-center justify-center rounded-full border border-[#42362E] bg-[#171311]/82 px-8 py-3 font-serif text-[24px] font-light leading-none text-[#B9A489] transition duration-300 hover:border-[#56463B] hover:text-[#D1C0A8]"
+                >
+                  Показать ещё
+                </button>
+              </div>
+            </FadeIn>
+          ) : null}
         </div>
       </div>
 
-      <div className="px-8 md:px-16 mt-20 md:mt-28">
-        <div className="max-w-[96rem] mx-auto">
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-[#2E2820] to-transparent" />
+      <div className="portfolio-tablet px-8">
+        <div className="mx-auto max-w-[96rem] space-y-4">
+          {tabletRows.map((row, rowIndex) => (
+            <FadeIn key={`tablet-row-${rowIndex}`} direction="up" delay={rowIndex * 50}>
+              <div
+                className="flex flex-col gap-4"
+                style={{ height: getTabletRowHeight(row.length, rowIndex) }}
+              >
+                <div className="flex h-full items-stretch gap-4">
+                  {row.map((item, itemIndex) => (
+                    <DesktopGalleryCard
+                      key={item.id}
+                      item={item}
+                      count={row.length}
+                      centerSolo={false}
+                      priority={rowIndex === 0 && itemIndex < 2}
+                    />
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
+          ))}
         </div>
       </div>
+
+      <div className="portfolio-desktop px-8 md:px-16">
+        <div className="mx-auto max-w-[96rem] space-y-4">
+          {desktopRows.map((row, rowIndex) => (
+            <FadeIn key={`desktop-row-${rowIndex}`} direction="up" delay={rowIndex * 50}>
+              <div
+                className={`flex items-stretch gap-4 ${row.length === 1 ? 'justify-center' : ''}`}
+                style={{ height: getDesktopRowHeight(row.length, rowIndex) }}
+              >
+                {row.map((item, itemIndex) => (
+                  <DesktopGalleryCard
+                    key={item.id}
+                    item={item}
+                    count={row.length}
+                    centerSolo={true}
+                    priority={rowIndex === 0 && itemIndex < 2}
+                  />
+                ))}
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-20 px-8 md:mt-28 md:px-16">
+        <div className="mx-auto max-w-[96rem]">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-[#2E2820] to-transparent" />
+        </div>
+      </div>
+
+      <style jsx>{`
+        .portfolio-meta-desktop,
+        .portfolio-tablet,
+        .portfolio-desktop {
+          display: none;
+        }
+
+        .portfolio-mobile {
+          display: block;
+        }
+
+        @media (min-width: 720px) and (max-width: 1023px) {
+          .portfolio-meta-desktop {
+            display: flex;
+          }
+
+          .portfolio-mobile,
+          .portfolio-desktop {
+            display: none;
+          }
+
+          .portfolio-tablet {
+            display: block;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .portfolio-meta-desktop {
+            display: flex;
+          }
+
+          .portfolio-mobile,
+          .portfolio-tablet {
+            display: none;
+          }
+
+          .portfolio-desktop {
+            display: block;
+          }
+        }
+      `}</style>
     </section>
   )
 }
