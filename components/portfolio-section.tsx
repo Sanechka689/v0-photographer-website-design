@@ -64,36 +64,31 @@ function DesktopGalleryCard({
 
   return (
     <figure
-      className="group flex min-w-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-[#24201B] bg-[#11100F] transition duration-300 hover:border-[#3B342C]"
+      className="group relative min-w-0 flex-1 overflow-hidden rounded-[4px] bg-transparent"
       style={
         count === 1 && centerSolo
           ? { width: soloWidth, flex: '0 1 auto' }
           : { flexGrow: Math.max(ratio, 0.72), flexBasis: 0 }
       }
     >
-      <div className="relative min-h-0 flex-1 overflow-hidden bg-[#151412]">
+      <div className="relative h-full min-h-0 overflow-hidden bg-[#11100F]">
         <Image
           src={item.src}
           alt={item.alt}
           fill
           priority={priority}
           sizes={getSizesByCount(count)}
-          className="object-contain transition duration-500 group-hover:scale-[1.01]"
+          className="object-contain transition duration-700 group-hover:scale-[1.015]"
         />
-      </div>
-      <figcaption className="flex min-h-[84px] items-end justify-between gap-5 border-t border-[#24201B] px-5 py-4">
-        <div className="min-w-0">
-          <p className="font-mono text-[9px] tracking-[0.28em] uppercase text-[#7F7568]">
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/70 to-transparent px-5 pb-5 pt-16 md:px-6 md:pb-6 md:pt-20">
+          <p className="font-mono text-[9px] tracking-[0.28em] uppercase text-[#E6D2A2]/58">
             {item.category}
           </p>
-          <h3 className="mt-2 truncate font-serif text-[22px] font-light leading-none text-[#F5F2E9] md:text-[24px]">
+          <h3 className="mt-2 font-serif text-[22px] font-light leading-none text-[#F5F2E9] md:text-[24px]">
             {item.title}
           </h3>
         </div>
-        <span className="shrink-0 font-mono text-[10px] tracking-[0.16em] uppercase text-[#4E473F]">
-          {String(item.id).padStart(2, '0')}
-        </span>
-      </figcaption>
+      </div>
     </figure>
   )
 }
@@ -122,9 +117,6 @@ function MobileFilmCard({ item, priority = false }: { item: PortfolioItem; prior
             {item.title}
           </h3>
         </div>
-        <span className="shrink-0 font-mono text-[10px] tracking-[0.16em] uppercase text-[#655B4F]">
-          {String(item.id).padStart(2, '0')}
-        </span>
       </div>
     </article>
   )
